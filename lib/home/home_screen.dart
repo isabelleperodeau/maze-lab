@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../auth/auth_service.dart';
 import '../auth/auth_state.dart';
 import 'continue_card.dart';
 import 'featured_paths.dart';
@@ -20,12 +19,7 @@ class HomeScreen extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await AuthService.logout();
-              if (context.mounted) {
-                await ref.read(authStateProvider.notifier).logout();
-              }
-            },
+            onPressed: () => ref.read(authStateProvider.notifier).logout(),
           ),
         ],
       ),
