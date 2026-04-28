@@ -18,11 +18,11 @@ class ApiClient {
   static String get baseUrl {
     const override = String.fromEnvironment('API_URL');
     if (override.isNotEmpty) return override;
-    if (kIsWeb) return 'http://localhost:8000';
+    if (kIsWeb) return 'http://192.168.101.18:8000';
     if (defaultTargetPlatform == TargetPlatform.android) {
       return 'http://10.0.2.2:8000';
     }
-    return 'http://localhost:8000';
+    return 'http://192.168.101.18:8000';
   }
 
   static Future<String?> _token() => _storage.read(key: _tokenKey);

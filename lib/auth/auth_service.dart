@@ -75,7 +75,12 @@ class AuthService {
     final googleAuth = await googleUser.authentication;
     final idToken = googleAuth.idToken;
     if (idToken == null) throw Exception('Failed to get ID token');
-    throw UnimplementedError('OAuth not supported by backend yet');
+
+    final response = await ApiClient.post('/users/oauth/google', {
+      'id_token': idToken,
+    }) as Map<String, dynamic>;
+
+    return _persistAuth(response);
   }
 
   static Future<Map<String, String>> loginWithApple() async {
@@ -87,7 +92,12 @@ class AuthService {
     );
     final idToken = credential.identityToken;
     if (idToken == null) throw Exception('Failed to get ID token');
-    throw UnimplementedError('OAuth not supported by backend yet');
+
+    final response = await ApiClient.post('/users/oauth/apple', {
+      'id_token': idToken,
+    }) as Map<String, dynamic>;
+
+    return _persistAuth(response);
   }
 
   static Future<void> logout() async {
