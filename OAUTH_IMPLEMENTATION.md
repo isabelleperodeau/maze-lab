@@ -121,33 +121,56 @@ APPLE_KEY_ID = os.getenv("APPLE_KEY_ID")
 APPLE_PRIVATE_KEY = os.getenv("APPLE_PRIVATE_KEY")
 
 
-def verify_google_token(id_token_str: str) -> Dict:
+def verify_google_token(token_str: str) -> Dict:
     """
-    Verify a Google ID token and return user information.
+    Verify a Google token (ID token or access token) and return user information.
     
     Args:
-        id_token_str: The ID token from Google Sign-In
+        token_str: The token from Google Sign-In (ID token or access token)
         
     Returns:
         Dictionary with 'sub' (unique ID), 'email', 'name', 'picture'
         
     Raises:
         ValueError: If token is invalid or verification fails
+        
+    Note:
+        - On Android/iOS: Receives ID token
+        - On Web: Receives access token (google_sign_in web SDK returns access token)
     """
     try:
-        # Verify the token with Google's public keys
-        idinfo = id_token.verify_oauth2_token(
-            id_token_str, requests.Request(), GOOGLE_CLIENT_ID
-        )
-        
-        # Token is valid
-        return {
-            'sub': idinfo['sub'],  # Unique identifier from Google
-            'email': idinfo.get('email'),
-            'name': idinfo.get('name'),
-            'picture': idinfo.get('picture'),
-            'provider': 'google',
-        }
+        # First, try to verify as ID token
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token_str, requests.Request(), GOOGLE_CLIENT_ID
+            )
+            return {
+                'sub': idinfo['sub'],
+                'email': idinfo.get('email'),
+                'name': idinfo.get('name'),
+                'picture': idinfo.get('picture'),
+                'provider': 'google',
+            }
+        except Exception:
+            # If ID token verification fails, try treating it as an access token
+            # Call Google's userinfo API to get user information
+            userinfo_response = requests.get(
+                'https://www.googleapis.com/oauth2/v2/userinfo',
+                headers={'Authorization': f'Bearer {token_str}'},
+                timeout=5
+            )
+            
+            if userinfo_response.status_code != 200:
+                raise ValueError("Invalid access token")
+            
+            userinfo = userinfo_response.json()
+            return {
+                'sub': userinfo.get('id'),
+                'email': userinfo.get('email'),
+                'name': userinfo.get('name'),
+                'picture': userinfo.get('picture'),
+                'provider': 'google',
+            }
     except Exception as e:
         raise ValueError(f"Invalid Google token: {str(e)}")
 

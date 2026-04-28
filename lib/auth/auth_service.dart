@@ -77,11 +77,13 @@ class AuthService {
     if (googleUser == null) throw Exception('Google sign-in cancelled');
 
     final googleAuth = await googleUser.authentication;
-    final idToken = googleAuth.idToken ?? googleAuth.accessToken;
-    if (idToken == null) throw Exception('Failed to get ID token');
+    final accessToken = googleAuth.accessToken;
+    if (accessToken == null) throw Exception('Failed to get access token');
 
+    // For web, Google returns access token instead of ID token
+    // We'll send the access token to backend for verification
     final response = await ApiClient.post('/users/oauth/google', {
-      'id_token': idToken,
+      'id_token': accessToken,  // Actually an access token on web
     }) as Map<String, dynamic>;
 
     return _persistAuth(response);
