@@ -75,8 +75,9 @@ class AuthService {
   static Future<Map<String, String>> loginWithGoogle() async {
     final googleUser = await _googleSignIn.signIn();
     if (googleUser == null) throw Exception('Google sign-in cancelled');
+
     final googleAuth = await googleUser.authentication;
-    final idToken = googleAuth.idToken;
+    final idToken = googleAuth.idToken ?? googleAuth.accessToken;
     if (idToken == null) throw Exception('Failed to get ID token');
 
     final response = await ApiClient.post('/users/oauth/google', {
