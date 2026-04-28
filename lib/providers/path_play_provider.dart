@@ -85,8 +85,6 @@ class PathPlayState {
 }
 
 class PathPlayNotifier extends Notifier<PathPlayState> {
-  late Timer _timer;
-
   @override
   PathPlayState build() => PathPlayState(
     pathId: 0,
@@ -137,27 +135,11 @@ class PathPlayNotifier extends Notifier<PathPlayState> {
         isPathComplete: puzzleInfos.every((p) => p.isCompleted),
         isLoading: false,
       );
-
-      _startTimer();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
       );
-    }
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      state = state.copyWith(
-        globalElapsedSeconds: state.globalElapsedSeconds + 1,
-      );
-    });
-  }
-
-  void _stopTimer() {
-    if (_timer.isActive) {
-      _timer.cancel();
     }
   }
 
@@ -187,19 +169,15 @@ class PathPlayNotifier extends Notifier<PathPlayState> {
       state = state.copyWith(
         puzzles: updatedPuzzles,
         currentPuzzleIndex: nextIndex,
+        globalElapsedSeconds: state.globalElapsedSeconds + timeTaken,
         isPathComplete: isComplete,
       );
-
-      if (isComplete) {
-        _stopTimer();
-      }
     } catch (e) {
       state = state.copyWith(error: e.toString());
     }
   }
 
   void reset() {
-    _stopTimer();
     state = PathPlayState(
       pathId: 0,
       pathName: '',
