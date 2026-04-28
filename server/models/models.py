@@ -13,6 +13,8 @@ class User(Base):
     hashed_password = Column(String)
     display_name = Column(String)
     avatar_url = Column(String, nullable=True)
+    oauth_provider = Column(String, nullable=True)
+    oauth_sub = Column(String, nullable=True, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     paths = relationship("Path", back_populates="creator")

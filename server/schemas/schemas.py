@@ -8,6 +8,11 @@ class LoginRequest(BaseModel):
     password: str
 
 
+class OAuthLoginRequest(BaseModel):
+    """OAuth ID token from frontend"""
+    id_token: str
+
+
 class UserCreate(BaseModel):
     username: str
     email: str
