@@ -296,114 +296,120 @@ class _KakuroGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cellSize = (MediaQuery.of(context).size.width - 32) / board[0].length;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final cellSize = (constraints.maxWidth) / board[0].length;
+        final maxCellSize = (constraints.maxHeight) / board.length;
+        final actualCellSize = cellSize < maxCellSize ? cellSize : maxCellSize;
 
-    return Column(
-      children: List.generate(board.length, (row) {
-        return Row(
-          children: List.generate(board[row].length, (col) {
-            final value = board[row][col];
-            final clue = clues[row][col];
-            final isSelected = selectedRow == row && selectedCol == col;
+        return Column(
+          children: List.generate(board.length, (row) {
+            return Row(
+              children: List.generate(board[row].length, (col) {
+                final value = board[row][col];
+                final clue = clues[row][col];
+                final isSelected = selectedRow == row && selectedCol == col;
 
-            if (value < 0 && clue == null) {
-              // Black cell
-              return Expanded(
-                child: Container(
-                  height: cellSize,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                    border: Border.all(color: theme.colorScheme.outline),
-                  ),
-                ),
-              );
-            } else if (clue != null) {
-              // Clue cell - check if adjacent cells exist for vertical/horizontal
-              final hasVertical = row + 1 < board.length && board[row + 1][col] >= 0;
-              final hasHorizontal = col + 1 < board[row].length && board[row][col + 1] >= 0;
-
-              return Expanded(
-                child: Container(
-                  height: cellSize,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primaryContainer,
-                    border: Border.all(color: theme.colorScheme.outline),
-                  ),
-                  child: Stack(
-                    children: [
-                      // Diagonal line from top-left to bottom-right
-                      CustomPaint(
-                        painter: _DiagonalPainter(theme.colorScheme.outline),
-                        size: Size(cellSize, cellSize),
+                if (value < 0 && clue == null) {
+                  // Black cell
+                  return Expanded(
+                    child: Container(
+                      height: actualCellSize,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[800],
+                        border: Border.all(color: theme.colorScheme.outline),
                       ),
-                      // Horizontal total (top-right) - only if cells to the right exist
-                      if (hasHorizontal && clue.horizontal != null)
-                        Positioned(
-                          top: 2,
-                          right: 2,
-                          child: Text(
-                            '${clue.horizontal}',
-                            style: theme.textTheme.labelSmall,
-                          ),
-                        ),
-                      // Vertical total (bottom-left) - only if cells below exist
-                      if (hasVertical && clue.vertical != null)
-                        Positioned(
-                          bottom: 2,
-                          left: 2,
-                          child: Text(
-                            '${clue.vertical}',
-                            style: theme.textTheme.labelSmall,
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              );
-            } else {
-              // Answer cell
-              Color backgroundColor = Colors.transparent;
-
-              if (isSelected) {
-                backgroundColor = theme.colorScheme.primary.withValues(alpha: 0.3);
-              } else if (showValidation) {
-                final cellState = validationState[(row, col)] ?? CellValidationState.empty;
-                switch (cellState) {
-                  case CellValidationState.valid:
-                    backgroundColor = Colors.green.withValues(alpha: 0.2);
-                  case CellValidationState.invalid:
-                    backgroundColor = Colors.red.withValues(alpha: 0.2);
-                  case CellValidationState.incomplete:
-                    backgroundColor = Colors.amber.withValues(alpha: 0.1);
-                  case CellValidationState.empty:
-                    backgroundColor = Colors.transparent;
-                }
-              }
-
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => onCellTap(row, col),
-                  child: Container(
-                    height: cellSize,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: theme.colorScheme.outline),
-                      color: backgroundColor,
                     ),
-                    child: Center(
-                      child: value == 0
-                          ? null
-                          : Text(
-                              '$value',
-                              style: theme.textTheme.titleLarge,
+                  );
+                } else if (clue != null) {
+                  // Clue cell - check if adjacent cells exist for vertical/horizontal
+                  final hasVertical = row + 1 < board.length && board[row + 1][col] >= 0;
+                  final hasHorizontal = col + 1 < board[row].length && board[row][col + 1] >= 0;
+
+                  return Expanded(
+                    child: Container(
+                      height: actualCellSize,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primaryContainer,
+                        border: Border.all(color: theme.colorScheme.outline),
+                      ),
+                      child: Stack(
+                        children: [
+                          // Diagonal line from top-left to bottom-right
+                          CustomPaint(
+                            painter: _DiagonalPainter(theme.colorScheme.outline),
+                            size: Size(actualCellSize, actualCellSize),
+                          ),
+                          // Horizontal total (top-right) - only if cells to the right exist
+                          if (hasHorizontal && clue.horizontal != null)
+                            Positioned(
+                              top: 2,
+                              right: 2,
+                              child: Text(
+                                '${clue.horizontal}',
+                                style: theme.textTheme.labelSmall,
+                              ),
                             ),
+                          // Vertical total (bottom-left) - only if cells below exist
+                          if (hasVertical && clue.vertical != null)
+                            Positioned(
+                              bottom: 2,
+                              left: 2,
+                              child: Text(
+                                '${clue.vertical}',
+                                style: theme.textTheme.labelSmall,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }
+                  );
+                } else {
+                  // Answer cell
+                  Color backgroundColor = Colors.transparent;
+
+                  if (isSelected) {
+                    backgroundColor = theme.colorScheme.primary.withValues(alpha: 0.3);
+                  } else if (showValidation) {
+                    final cellState = validationState[(row, col)] ?? CellValidationState.empty;
+                    switch (cellState) {
+                      case CellValidationState.valid:
+                        backgroundColor = Colors.green.withValues(alpha: 0.2);
+                      case CellValidationState.invalid:
+                        backgroundColor = Colors.red.withValues(alpha: 0.2);
+                      case CellValidationState.incomplete:
+                        backgroundColor = Colors.amber.withValues(alpha: 0.1);
+                      case CellValidationState.empty:
+                        backgroundColor = Colors.transparent;
+                    }
+                  }
+
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => onCellTap(row, col),
+                      child: Container(
+                        height: actualCellSize,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: theme.colorScheme.outline),
+                          color: backgroundColor,
+                        ),
+                        child: Center(
+                          child: value == 0
+                              ? null
+                              : Text(
+                                  '$value',
+                                  style: theme.textTheme.titleLarge,
+                                ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              }),
+            );
           }),
         );
-      }),
+      },
     );
   }
 }
