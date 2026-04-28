@@ -9,7 +9,10 @@ class AuthService {
   static const String _emailKey = 'user_email';
 
   static const _secureStorage = FlutterSecureStorage();
-  static final _googleSignIn = GoogleSignIn(scopes: ['email', 'profile']);
+  static final _googleSignIn = GoogleSignIn(
+    clientId: '113246921478-1h9m23jkitptmk2lqn6kgjagoekuo49k.apps.googleusercontent.com',
+    scopes: ['email', 'profile'],
+  );
 
   static Future<Map<String, String>> register({
     required String username,
