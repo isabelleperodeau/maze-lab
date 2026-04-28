@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Optional
 from sqlalchemy.orm import Session
 from db.database import get_db
 from models.models import Completion as CompletionModel
@@ -35,10 +36,14 @@ def get_path_completions(path_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/")
-def get_completions(path_id: int = None, user_id: int = None, db: Session = Depends(get_db)):
+def get_completions(
+    path_id: Optional[int] = Query(None),
+    user_id: Optional[int] = Query(None),
+    db: Session = Depends(get_db)
+):
     query = db.query(CompletionModel)
-    if path_id:
+    if path_id is not None:
         query = query.filter(CompletionModel.path_id == path_id)
-    if user_id:
+    if user_id is not None:
         query = query.filter(CompletionModel.user_id == user_id)
     return query.all()

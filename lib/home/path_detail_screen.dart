@@ -24,13 +24,13 @@ class _PathDetailScreenState extends ConsumerState<PathDetailScreen> {
   void initState() {
     super.initState();
     _intPathId = int.parse(widget.pathId);
-    _loadPath();
+    Future.microtask(() => _loadPath());
   }
 
-  void _loadPath() {
+  Future<void> _loadPath() async {
     final auth = ref.read(authStateProvider);
     if (auth != null) {
-      ref.read(pathPlayProvider.notifier).loadPath(_intPathId, auth.userId);
+      await ref.read(pathPlayProvider.notifier).loadPath(_intPathId, auth.userId);
     }
   }
 

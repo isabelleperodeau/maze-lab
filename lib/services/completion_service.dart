@@ -37,8 +37,9 @@ class CompletionService {
     String userId,
   ) async {
     try {
+      final userIdInt = int.tryParse(userId) ?? 0;
       final response = await ApiClient.get(
-        '/completions?path_id=$pathId&user_id=$userId',
+        '/completions?path_id=$pathId&user_id=$userIdInt',
         auth: true,
       ) as List;
 
@@ -46,7 +47,7 @@ class CompletionService {
           .cast<Map<String, dynamic>>()
           .map((c) => CompletionData.fromJson(c))
           .toList();
-    } catch (_) {
+    } catch (e) {
       return [];
     }
   }
