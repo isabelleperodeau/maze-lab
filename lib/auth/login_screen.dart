@@ -73,6 +73,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _handleOAuthLogin(
+    Future<Map<String, String>> Function() oauthMethod,
+  ) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final result = await oauthMethod();
+      if (mounted) {
+        await ref.read(authStateProvider.notifier).setUser(
+              result['user_id']!,
+              result['email']!,
+              result['token']!,
+            );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('OAuth error: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -103,6 +127,37 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 48),
+                  if (!_isRegisterMode) ...[
+                    OutlinedButton.icon(
+                      onPressed: _isLoading
+                          ? null
+                          : () => _handleOAuthLogin(AuthService.loginWithGoogle),
+                      icon: const Icon(Icons.g_mobiledata),
+                      label: const Text('Sign in with Google'),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: _isLoading
+                          ? null
+                          : () => _handleOAuthLogin(AuthService.loginWithApple),
+                      icon: const Icon(Icons.apple),
+                      label: const Text('Sign in with Apple'),
+                    ),
+                    const SizedBox(height: 24),
+                    Divider(
+                      color: theme.colorScheme.outlineVariant,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        'Or continue with email',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
                   if (_isRegisterMode) ...[
                     TextFormField(
                       controller: _usernameController,
