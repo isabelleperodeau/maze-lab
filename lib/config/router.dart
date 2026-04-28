@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../auth/auth_state.dart';
 import '../auth/login_screen.dart';
 import '../home/home_screen.dart';
+import '../home/paths_tab_screen.dart';
+import '../home/create_path/path_creation_screen.dart';
 import '../games/sudoku/sudoku_screen.dart';
 import '../games/kakuro/kakuro_screen.dart';
 import '../games/nonogram/nonogram_screen.dart';
@@ -40,7 +42,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/paths',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Paths'),
+        builder: (context, state) => const PathsTabScreen(),
+        routes: [
+          GoRoute(
+            path: 'create',
+            builder: (context, state) => const PathCreationScreen(),
+          ),
+          GoRoute(
+            path: ':pathId',
+            builder: (context, state) => const _PlaceholderScreen(title: 'Path Detail'),
+          ),
+        ],
       ),
       GoRoute(
         path: '/friends',

@@ -36,14 +36,18 @@ def get_puzzles_by_type(puzzle_type: str, db: Session = Depends(get_db)):
 
 
 @router.get("/random/{puzzle_type}")
-def get_random_puzzle(puzzle_type: str, db: Session = Depends(get_db)):
+def get_random_puzzle(puzzle_type: str, difficulty: str = "easy", db: Session = Depends(get_db)):
     from sqlalchemy import func
     puzzle = (
         db.query(PuzzleModel)
         .filter(PuzzleModel.type == puzzle_type)
+        .filter(PuzzleModel.difficulty == difficulty)
         .order_by(func.random())
         .first()
     )
     if not puzzle:
-        raise HTTPException(status_code=404, detail=f"No puzzles of type {puzzle_type} found")
+        raise HTTPException(
+            status_code=404,
+            detail=f"No puzzles of type {puzzle_type} with difficulty {difficulty} found"
+        )
     return puzzle
