@@ -6,9 +6,18 @@ import '../models/game_state.dart';
 import 'sudoku_provider.dart';
 
 class SudokuScreen extends ConsumerStatefulWidget {
-  const SudokuScreen({super.key, required this.difficulty});
+  const SudokuScreen({
+    super.key,
+    required this.difficulty,
+    this.pathId,
+    this.puzzleIndex,
+    this.puzzleId,
+  });
 
   final String difficulty;
+  final String? pathId;
+  final String? puzzleIndex;
+  final String? puzzleId;
 
   @override
   ConsumerState<SudokuScreen> createState() => _SudokuScreenState();

@@ -6,9 +6,18 @@ import '../models/game_state.dart';
 import '../2048/game_2048_provider.dart';
 
 class TwentyFortyEightScreen extends ConsumerStatefulWidget {
-  const TwentyFortyEightScreen({super.key, required this.difficulty});
+  const TwentyFortyEightScreen({
+    super.key,
+    required this.difficulty,
+    this.pathId,
+    this.puzzleIndex,
+    this.puzzleId,
+  });
 
   final String difficulty;
+  final String? pathId;
+  final String? puzzleIndex;
+  final String? puzzleId;
 
   @override
   ConsumerState<TwentyFortyEightScreen> createState() => _TwentyFortyEightScreenState();

@@ -46,6 +46,41 @@ class PathData {
   }
 }
 
+class PathWithPuzzlesData extends PathData {
+  final List<PuzzleData> puzzles;
+
+  PathWithPuzzlesData({
+    required int id,
+    required String name,
+    required String description,
+    required bool isPublic,
+    required int creatorId,
+    required this.puzzles,
+  }) : super(
+    id: id,
+    name: name,
+    description: description,
+    isPublic: isPublic,
+    creatorId: creatorId,
+  );
+
+  factory PathWithPuzzlesData.fromJson(Map<String, dynamic> json) {
+    final puzzlesList = (json['puzzles'] as List?)
+        ?.cast<Map<String, dynamic>>()
+        .map((p) => PuzzleData.fromJson(p))
+        .toList() ?? [];
+
+    return PathWithPuzzlesData(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      description: json['description'] ?? '',
+      isPublic: json['is_public'] ?? false,
+      creatorId: json['creator_id'] ?? 0,
+      puzzles: puzzlesList,
+    );
+  }
+}
+
 class PathService {
   static Future<PuzzleData> fetchRandomPuzzle(
     String gameType,
@@ -105,14 +140,14 @@ class PathService {
     }
   }
 
-  static Future<PathData> getPath(int pathId) async {
+  static Future<PathWithPuzzlesData> getPath(int pathId) async {
     try {
       final response = await ApiClient.get(
         '/paths/$pathId',
         auth: true,
       ) as Map<String, dynamic>;
 
-      return PathData.fromJson(response);
+      return PathWithPuzzlesData.fromJson(response);
     } catch (e) {
       throw Exception('Failed to fetch path: $e');
     }

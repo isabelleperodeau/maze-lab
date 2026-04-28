@@ -7,9 +7,18 @@ import '../models/nonogram_state.dart';
 import 'nonogram_provider.dart';
 
 class NonogramScreen extends ConsumerStatefulWidget {
-  const NonogramScreen({super.key, required this.difficulty});
+  const NonogramScreen({
+    super.key,
+    required this.difficulty,
+    this.pathId,
+    this.puzzleIndex,
+    this.puzzleId,
+  });
 
   final String difficulty;
+  final String? pathId;
+  final String? puzzleIndex;
+  final String? puzzleId;
 
   @override
   ConsumerState<NonogramScreen> createState() => _NonogramScreenState();

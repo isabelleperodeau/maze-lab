@@ -5,11 +5,22 @@ import 'package:go_router/go_router.dart';
 import '../models/game_state.dart';
 import '../models/kakuro_state.dart';
 import 'kakuro_provider.dart';
+import '../../services/completion_service.dart';
+import '../../providers/path_play_provider.dart';
 
 class KakuroScreen extends ConsumerStatefulWidget {
-  const KakuroScreen({super.key, required this.difficulty});
+  const KakuroScreen({
+    super.key,
+    required this.difficulty,
+    this.pathId,
+    this.puzzleIndex,
+    this.puzzleId,
+  });
 
   final String difficulty;
+  final String? pathId;
+  final String? puzzleIndex;
+  final String? puzzleId;
 
   @override
   ConsumerState<KakuroScreen> createState() => _KakuroScreenState();
@@ -31,7 +42,7 @@ class _KakuroScreenState extends ConsumerState<KakuroScreen> {
     });
   }
 
-  void _showSolvedDialog() {
+  void _showSolvedDialog() async {
     final gameState = ref.read(kakuroGameProvider);
     showDialog(
       context: context,
@@ -48,9 +59,37 @@ class _KakuroScreenState extends ConsumerState<KakuroScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              context.go('/');
+
+              if (widget.pathId != null &&
+                  widget.puzzleIndex != null &&
+                  widget.puzzleId != null) {
+                try {
+                  await CompletionService.recordCompletion(
+                    pathId: int.parse(widget.pathId!),
+                    puzzleId: int.parse(widget.puzzleId!),
+                    timeTaken: gameState.elapsedSeconds,
+                  );
+
+                  if (mounted) {
+                    ref.read(pathPlayProvider.notifier).markPuzzleComplete(
+                      int.parse(widget.puzzleIndex!),
+                      gameState.elapsedSeconds,
+                    );
+
+                    context.go('/paths/${widget.pathId}');
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error saving completion: $e')),
+                    );
+                  }
+                }
+              } else if (mounted) {
+                context.go('/');
+              }
             },
             child: const Text('Retour à l\'accueil'),
           ),

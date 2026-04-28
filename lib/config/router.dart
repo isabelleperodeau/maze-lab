@@ -7,6 +7,7 @@ import '../auth/login_screen.dart';
 import '../home/home_screen.dart';
 import '../home/paths_tab_screen.dart';
 import '../home/create_path/path_creation_screen.dart';
+import '../home/path_detail_screen.dart';
 import '../games/sudoku/sudoku_screen.dart';
 import '../games/kakuro/kakuro_screen.dart';
 import '../games/nonogram/nonogram_screen.dart';
@@ -50,7 +51,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: ':pathId',
-            builder: (context, state) => const _PlaceholderScreen(title: 'Path Detail'),
+            builder: (context, state) {
+              final pathId = state.pathParameters['pathId'] ?? '0';
+              return PathDetailScreen(pathId: pathId);
+            },
           ),
         ],
       ),
@@ -67,17 +71,40 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) {
           final gameId = state.pathParameters['gameId'];
           final difficulty = state.pathParameters['difficulty'] ?? 'easy';
+          final pathId = state.uri.queryParameters['pathId'];
+          final puzzleIndex = state.uri.queryParameters['puzzleIndex'];
+          final puzzleId = state.uri.queryParameters['puzzleId'];
 
           Widget child;
           switch (gameId) {
             case 'sudoku':
-              child = SudokuScreen(difficulty: difficulty);
+              child = SudokuScreen(
+                difficulty: difficulty,
+                pathId: pathId,
+                puzzleIndex: puzzleIndex,
+                puzzleId: puzzleId,
+              );
             case 'kakuro':
-              child = KakuroScreen(difficulty: difficulty);
+              child = KakuroScreen(
+                difficulty: difficulty,
+                pathId: pathId,
+                puzzleIndex: puzzleIndex,
+                puzzleId: puzzleId,
+              );
             case 'nonogram':
-              child = NonogramScreen(difficulty: difficulty);
+              child = NonogramScreen(
+                difficulty: difficulty,
+                pathId: pathId,
+                puzzleIndex: puzzleIndex,
+                puzzleId: puzzleId,
+              );
             case '2048':
-              child = TwentyFortyEightScreen(difficulty: difficulty);
+              child = TwentyFortyEightScreen(
+                difficulty: difficulty,
+                pathId: pathId,
+                puzzleIndex: puzzleIndex,
+                puzzleId: puzzleId,
+              );
             default:
               child = const _PlaceholderScreen(title: 'Game');
           }

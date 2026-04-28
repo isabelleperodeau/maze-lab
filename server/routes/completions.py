@@ -32,3 +32,13 @@ def get_user_completions(user_id: int, db: Session = Depends(get_db)):
 def get_path_completions(path_id: int, db: Session = Depends(get_db)):
     completions = db.query(CompletionModel).filter(CompletionModel.path_id == path_id).all()
     return completions
+
+
+@router.get("/")
+def get_completions(path_id: int = None, user_id: int = None, db: Session = Depends(get_db)):
+    query = db.query(CompletionModel)
+    if path_id:
+        query = query.filter(CompletionModel.path_id == path_id)
+    if user_id:
+        query = query.filter(CompletionModel.user_id == user_id)
+    return query.all()
