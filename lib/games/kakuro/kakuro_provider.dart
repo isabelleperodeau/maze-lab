@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/kakuro_state.dart';
 import '../models/game_state.dart';
+import '../../services/puzzle_service.dart';
 
 class KakuroGameNotifier extends Notifier<KakuroGameState> {
   Timer? _timer;
@@ -12,13 +13,71 @@ class KakuroGameNotifier extends Notifier<KakuroGameState> {
     return _initializeGame(GameDifficulty.easy);
   }
 
-  void startGame(GameDifficulty difficulty) {
+  Future<void> startGame(GameDifficulty difficulty) async {
     _stopTimer();
-    state = _initializeGame(difficulty);
+    try {
+      final puzzle = await PuzzleService.getRandomPuzzle('kakuro', difficulty.name);
+      state = _initializeGameFromPuzzle(puzzle, difficulty);
+    } catch (e) {
+      // Fallback to sample data on error
+      state = _initializeGameWithSampleData(difficulty);
+    }
     _startTimer();
   }
 
-  KakuroGameState _initializeGame(GameDifficulty difficulty) {
+  KakuroGameState _initializeGameFromPuzzle(dynamic puzzle, GameDifficulty difficulty) {
+    // Parse the board from puzzle data
+    final boardData = puzzle.data['board'] as List;
+
+    // Convert board to proper format
+    final initialBoard = <List<int>>[];
+    final cluesGrid = <List<KakuroClue?>>[];
+
+    for (int r = 0; r < boardData.length; r++) {
+      final boardRow = <int>[];
+      final clueRow = <KakuroClue?>[];
+
+      final row = boardData[r] as List;
+
+      for (int c = 0; c < row.length; c++) {
+        final cell = row[c];
+
+        if (cell == -1) {
+          // Black cell
+          boardRow.add(-1);
+          clueRow.add(null);
+        } else if (cell is Map) {
+          // Clue cell
+          final h = cell['h'] as int?;
+          final v = cell['v'] as int?;
+          boardRow.add(-1);
+          clueRow.add(KakuroClue(horizontal: h, vertical: v));
+        } else if (cell == 0 || cell == null) {
+          // Answer cell
+          boardRow.add(0);
+          clueRow.add(null);
+        }
+      }
+
+      initialBoard.add(boardRow);
+      cluesGrid.add(clueRow);
+    }
+
+    final blocks = _createBlocks(cluesGrid);
+    final validationState = _validateBoard(initialBoard, blocks);
+
+    return KakuroGameState(
+      board: initialBoard,
+      clues: cluesGrid,
+      blocks: blocks,
+      moves: [],
+      cellValidationState: validationState,
+      difficulty: difficulty,
+      elapsedSeconds: 0,
+    );
+  }
+
+  KakuroGameState _initializeGameWithSampleData(GameDifficulty difficulty) {
     _solutionGrid = sampleKakuroValues.map((row) => [...row]).toList();
 
     // Create board from sampleKakuroValues: replace answer values with 0 (empty)
@@ -65,6 +124,10 @@ class KakuroGameNotifier extends Notifier<KakuroGameState> {
       difficulty: difficulty,
       elapsedSeconds: 0,
     );
+  }
+
+  KakuroGameState _initializeGame(GameDifficulty difficulty) {
+    return _initializeGameWithSampleData(difficulty);
   }
 
   void setCell(int row, int col, int value) {

@@ -37,8 +37,8 @@ class _KakuroScreenState extends ConsumerState<KakuroScreen> {
       (d) => d.name == widget.difficulty,
       orElse: () => GameDifficulty.easy,
     );
-    Future.microtask(() {
-      ref.read(kakuroGameProvider.notifier).startGame(difficultyEnum);
+    Future.microtask(() async {
+      await ref.read(kakuroGameProvider.notifier).startGame(difficultyEnum);
     });
   }
 
