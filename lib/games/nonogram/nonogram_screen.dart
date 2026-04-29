@@ -37,8 +37,8 @@ class _NonogramScreenState extends ConsumerState<NonogramScreen> {
       (d) => d.name == widget.difficulty,
       orElse: () => GameDifficulty.easy,
     );
-    Future.microtask(() {
-      ref.read(nonogramGameProvider.notifier).startGame(difficultyEnum);
+    Future.microtask(() async {
+      await ref.read(nonogramGameProvider.notifier).startGame(difficultyEnum);
     });
   }
 

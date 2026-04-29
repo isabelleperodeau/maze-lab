@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/nonogram_state.dart';
 import '../models/game_state.dart';
+import '../../services/puzzle_service.dart';
 
 class NonogramGameNotifier extends Notifier<NonogramGameState> {
   Timer? _timer;
@@ -12,10 +13,36 @@ class NonogramGameNotifier extends Notifier<NonogramGameState> {
     return _initializeGame(GameDifficulty.easy);
   }
 
-  void startGame(GameDifficulty difficulty) {
+  Future<void> startGame(GameDifficulty difficulty) async {
     _stopTimer();
-    state = _initializeGame(difficulty);
-    _startTimer();
+    try {
+      final puzzle = await PuzzleService.getRandomPuzzle('nonogram', difficulty.name);
+      final solutionGrid = (puzzle.solution['grid'] as List).cast<List<int>>();
+      final rowHints = (puzzle.data['row_hints'] as List).map((h) => (h as List).cast<int>().toList()).toList();
+      final colHints = (puzzle.data['col_hints'] as List).map((h) => (h as List).cast<int>().toList()).toList();
+
+      _solution = solutionGrid.map((row) => [...row]).toList();
+
+      final initialBoard = List.generate(
+        _solution.length,
+        (_) => List.filled(_solution[0].length, CellState.empty),
+      );
+
+      state = NonogramGameState(
+        board: initialBoard,
+        solution: _solution,
+        rowHints: rowHints,
+        colHints: colHints,
+        moves: [],
+        difficulty: difficulty,
+        elapsedSeconds: 0,
+      );
+      _startTimer();
+    } catch (e) {
+      // Fallback to sample data on error
+      state = _initializeGameWithSampleData(difficulty);
+      _startTimer();
+    }
   }
 
   NonogramGameState _initializeGame(GameDifficulty difficulty) {
@@ -35,6 +62,10 @@ class NonogramGameNotifier extends Notifier<NonogramGameState> {
       difficulty: difficulty,
       elapsedSeconds: 0,
     );
+  }
+
+  NonogramGameState _initializeGameWithSampleData(GameDifficulty difficulty) {
+    return _initializeGame(difficulty);
   }
 
   void setCellState(int row, int col, CellState newState) {
