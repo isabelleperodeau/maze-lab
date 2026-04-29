@@ -106,6 +106,17 @@ class _TwentyFortyEightScreenState extends ConsumerState<TwentyFortyEightScreen>
     );
   }
 
+  String _getTargetTileString(GameDifficulty difficulty) {
+    switch (difficulty) {
+      case GameDifficulty.easy:
+        return '2048';
+      case GameDifficulty.medium:
+        return '4096';
+      case GameDifficulty.hard:
+        return '8192';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameState = ref.watch(game2048Provider);
@@ -162,9 +173,22 @@ class _TwentyFortyEightScreenState extends ConsumerState<TwentyFortyEightScreen>
                     ),
                   ),
                 ),
-                Text(
-                  'Score: ${gameState.score}',
-                  style: theme.textTheme.bodySmall,
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Target: ${_getTargetTileString(gameState.difficulty)}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Score: ${gameState.score}',
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  ],
                 ),
               ],
             ),
