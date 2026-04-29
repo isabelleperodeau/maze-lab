@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from db.database import SessionLocal, engine
 from models.models import Base, Puzzle
 from generators.nonogram_generator import generate_nonogram
+from generators.kakuro_generator import generate_kakuro
 
 def seed_puzzles():
     """Create test puzzles in the database."""
@@ -33,6 +34,19 @@ def seed_puzzles():
                 )
             )
 
+        # Generate Kakuro puzzles
+        kakuro_puzzles = []
+        for difficulty in ["easy", "medium", "hard"]:
+            puzzle_data = generate_kakuro(difficulty)
+            kakuro_puzzles.append(
+                Puzzle(
+                    type="kakuro",
+                    difficulty=difficulty,
+                    data={"board": puzzle_data["board"]},
+                    solution={"board": puzzle_data["solution"]},
+                )
+            )
+
         test_puzzles = [
             # Sudoku puzzles
             Puzzle(
@@ -53,27 +67,10 @@ def seed_puzzles():
                 data={"grid": [[0]*9 for _ in range(9)]},
                 solution={"grid": [[i]*9 for i in range(1, 10)]},
             ),
-            # Kakuro puzzles
-            Puzzle(
-                type="kakuro",
-                difficulty="easy",
-                data={"board": [[0]*7 for _ in range(7)]},
-                solution={"board": [[i]*7 for i in range(1, 8)]},
-            ),
-            Puzzle(
-                type="kakuro",
-                difficulty="medium",
-                data={"board": [[0]*7 for _ in range(7)]},
-                solution={"board": [[i]*7 for i in range(1, 8)]},
-            ),
-            Puzzle(
-                type="kakuro",
-                difficulty="hard",
-                data={"board": [[0]*7 for _ in range(7)]},
-                solution={"board": [[i]*7 for i in range(1, 8)]},
-            ),
             # Nonogram puzzles (generated)
             *nonogram_puzzles,
+            # Kakuro puzzles (generated)
+            *kakuro_puzzles,
             # 2048 puzzles - difficulty determines target tile
             Puzzle(
                 type="2048",
