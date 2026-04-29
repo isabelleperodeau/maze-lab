@@ -3,6 +3,7 @@ import sys
 from sqlalchemy.orm import Session
 from db.database import SessionLocal, engine
 from models.models import Base, Puzzle
+from generators.nonogram_generator import generate_nonogram
 
 def seed_puzzles():
     """Create test puzzles in the database."""
@@ -54,25 +55,19 @@ def seed_puzzles():
                 data={"board": [[0]*7 for _ in range(7)]},
                 solution={"board": [[i]*7 for i in range(1, 8)]},
             ),
-            # Nonogram puzzles
-            Puzzle(
-                type="nonogram",
-                difficulty="easy",
-                data={"grid": [[0]*10 for _ in range(10)]},
-                solution={"grid": [[1]*10 for _ in range(10)]},
-            ),
-            Puzzle(
-                type="nonogram",
-                difficulty="medium",
-                data={"grid": [[0]*10 for _ in range(10)]},
-                solution={"grid": [[1]*10 for _ in range(10)]},
-            ),
-            Puzzle(
-                type="nonogram",
-                difficulty="hard",
-                data={"grid": [[0]*10 for _ in range(10)]},
-                solution={"grid": [[1]*10 for _ in range(10)]},
-            ),
+            # Nonogram puzzles (generated)
+            *[
+                (lambda puzzle: Puzzle(
+                    type="nonogram",
+                    difficulty=difficulty,
+                    data={
+                        "row_hints": puzzle["row_hints"],
+                        "col_hints": puzzle["col_hints"],
+                    },
+                    solution={"grid": puzzle["grid"]},
+                ))(generate_nonogram(difficulty))
+                for difficulty in ["easy", "medium", "hard"]
+            ],
             # 2048 puzzles - difficulty determines target tile
             Puzzle(
                 type="2048",
