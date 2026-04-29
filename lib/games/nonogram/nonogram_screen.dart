@@ -339,10 +339,10 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
     if (gridBox == null) return;
 
     final localPosition = gridBox.globalToLocal(event.position);
-    final maxHintWidth = 50.0;
+    final hintWidth = 80.0;
     final hintRowHeight = cellSize * 2;
 
-    final adjustedX = localPosition.dx - maxHintWidth;
+    final adjustedX = localPosition.dx - hintWidth;
     final adjustedY = localPosition.dy - hintRowHeight;
 
     if (adjustedX < 0 || adjustedY < 0) return;
@@ -362,8 +362,10 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final cellSize = (MediaQuery.of(context).size.width - 100) / widget.board[0].length;
-    final maxHintWidth = 50.0;
+    final gridSize = widget.board[0].length;
+    final availableWidth = MediaQuery.of(context).size.width - 80;
+    final hintWidth = 80.0;
+    final cellSize = (availableWidth - hintWidth) / gridSize;
 
     return Listener(
       onPointerDown: (event) {
@@ -381,7 +383,7 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              width: maxHintWidth,
+              width: hintWidth,
               child: Column(
                 children: [
                   SizedBox(height: cellSize * 2),
@@ -391,8 +393,13 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
                       child: Center(
                         child: Text(
                           widget.rowHints[row].join(','),
-                          style: theme.textTheme.labelSmall,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 12,
+                          ),
                           textAlign: TextAlign.center,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     );
@@ -404,14 +411,17 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: cellSize * 2,
+                    height: cellSize * 2.5,
                     child: Row(
                       children: List.generate(widget.board[0].length, (col) {
                         return Expanded(
                           child: Center(
                             child: Text(
                               widget.colHints[col].join('\n'),
-                              style: theme.textTheme.labelSmall?.copyWith(fontSize: 8),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 11,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
