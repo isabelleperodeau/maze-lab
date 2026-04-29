@@ -73,7 +73,7 @@ def seed_puzzles():
                 data={"grid": [[0]*10 for _ in range(10)]},
                 solution={"grid": [[1]*10 for _ in range(10)]},
             ),
-            # 2048 puzzles
+            # 2048 puzzles - difficulty determines target tile
             Puzzle(
                 type="2048",
                 difficulty="easy",
@@ -84,13 +84,13 @@ def seed_puzzles():
                 type="2048",
                 difficulty="medium",
                 data={"board": [[4, 2], [2, 4]]},
-                solution={"target": 2048},
+                solution={"target": 4096},
             ),
             Puzzle(
                 type="2048",
                 difficulty="hard",
                 data={"board": [[8, 4], [4, 8]]},
-                solution={"target": 2048},
+                solution={"target": 8192},
             ),
         ]
 

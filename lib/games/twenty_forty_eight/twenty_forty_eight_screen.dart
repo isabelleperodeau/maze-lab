@@ -38,11 +38,25 @@ class _TwentyFortyEightScreenState extends ConsumerState<TwentyFortyEightScreen>
 
   void _showWinDialog() {
     final gameState = ref.read(game2048Provider);
+
+    String getTargetTile(GameDifficulty difficulty) {
+      switch (difficulty) {
+        case GameDifficulty.easy:
+          return '2048';
+        case GameDifficulty.medium:
+          return '4096';
+        case GameDifficulty.hard:
+          return '8192';
+      }
+    }
+
+    final targetTile = getTargetTile(gameState.difficulty);
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('🎉 Vous avez atteint 2048!'),
+        title: Text('🎉 Vous avez atteint $targetTile!'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

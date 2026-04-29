@@ -92,7 +92,7 @@ class Game2048Notifier extends Notifier<Game2048State> {
     final newMove = Move(row: direction.index, col: 0, value: scoreGained);
     final newMoves = [...state.moves, newMove];
 
-    bool isSolved = _hasReached2048(newBoard);
+    bool isSolved = _hasReachedTarget(newBoard, state.difficulty);
     bool isGameLost = _isGameOver(newBoard);
 
     if (isSolved || isGameLost) {
@@ -152,10 +152,22 @@ class Game2048Notifier extends Notifier<Game2048State> {
     }
   }
 
-  bool _hasReached2048(List<List<int>> board) {
+  int _getTargetTile(GameDifficulty difficulty) {
+    switch (difficulty) {
+      case GameDifficulty.easy:
+        return 2048;
+      case GameDifficulty.medium:
+        return 4096;
+      case GameDifficulty.hard:
+        return 8192;
+    }
+  }
+
+  bool _hasReachedTarget(List<List<int>> board, GameDifficulty difficulty) {
+    final target = _getTargetTile(difficulty);
     for (int i = 0; i < 4; i++) {
       for (int j = 0; j < 4; j++) {
-        if (board[i][j] >= 2048) {
+        if (board[i][j] >= target) {
           return true;
         }
       }
