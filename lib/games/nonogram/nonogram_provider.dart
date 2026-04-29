@@ -17,9 +17,18 @@ class NonogramGameNotifier extends Notifier<NonogramGameState> {
     _stopTimer();
     try {
       final puzzle = await PuzzleService.getRandomPuzzle('nonogram', difficulty.name);
-      final solutionGrid = (puzzle.solution['grid'] as List).cast<List<int>>();
-      final rowHints = (puzzle.data['row_hints'] as List).map((h) => (h as List).cast<int>().toList()).toList();
-      final colHints = (puzzle.data['col_hints'] as List).map((h) => (h as List).cast<int>().toList()).toList();
+
+      // Parse solution grid
+      final gridData = puzzle.solution['grid'] as List;
+      final solutionGrid = gridData.map((row) => (row as List).cast<int>().toList()).toList();
+
+      // Parse row hints
+      final rowHintsData = puzzle.data['row_hints'] as List;
+      final rowHints = rowHintsData.map((h) => (h as List).cast<int>().toList()).toList();
+
+      // Parse column hints
+      final colHintsData = puzzle.data['col_hints'] as List;
+      final colHints = colHintsData.map((h) => (h as List).cast<int>().toList()).toList();
 
       _solution = solutionGrid.map((row) => [...row]).toList();
 
