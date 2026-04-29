@@ -10,11 +10,28 @@ def seed_puzzles():
     db = SessionLocal()
 
     try:
-        # Check if puzzles already exist
+        # Delete existing puzzles to reseed
         existing = db.query(Puzzle).count()
         if existing > 0:
-            print(f"Database already has {existing} puzzles, skipping seed")
-            return
+            print(f"Deleting {existing} existing puzzles...")
+            db.query(Puzzle).delete()
+            db.commit()
+
+        # Generate nonogram puzzles
+        nonogram_puzzles = []
+        for difficulty in ["easy", "medium", "hard"]:
+            puzzle_data = generate_nonogram(difficulty)
+            nonogram_puzzles.append(
+                Puzzle(
+                    type="nonogram",
+                    difficulty=difficulty,
+                    data={
+                        "row_hints": puzzle_data["row_hints"],
+                        "col_hints": puzzle_data["col_hints"],
+                    },
+                    solution={"grid": puzzle_data["grid"]},
+                )
+            )
 
         test_puzzles = [
             # Sudoku puzzles
@@ -56,18 +73,7 @@ def seed_puzzles():
                 solution={"board": [[i]*7 for i in range(1, 8)]},
             ),
             # Nonogram puzzles (generated)
-            *[
-                (lambda puzzle: Puzzle(
-                    type="nonogram",
-                    difficulty=difficulty,
-                    data={
-                        "row_hints": puzzle["row_hints"],
-                        "col_hints": puzzle["col_hints"],
-                    },
-                    solution={"grid": puzzle["grid"]},
-                ))(generate_nonogram(difficulty))
-                for difficulty in ["easy", "medium", "hard"]
-            ],
+            *nonogram_puzzles,
             # 2048 puzzles - difficulty determines target tile
             Puzzle(
                 type="2048",
