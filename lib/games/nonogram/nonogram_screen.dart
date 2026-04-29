@@ -339,11 +339,11 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
     if (gridBox == null) return;
 
     final localPosition = gridBox.globalToLocal(event.position);
-    final hintWidth = 80.0;
-    final hintRowHeight = cellSize * 2;
+    final hintWidth = 60.0;
+    final hintHeight = 60.0;
 
     final adjustedX = localPosition.dx - hintWidth;
-    final adjustedY = localPosition.dy - hintRowHeight;
+    final adjustedY = localPosition.dy - hintHeight;
 
     if (adjustedX < 0 || adjustedY < 0) return;
 
@@ -363,9 +363,18 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final gridSize = widget.board[0].length;
-    final availableWidth = MediaQuery.of(context).size.width - 80;
-    final hintWidth = 80.0;
-    final cellSize = (availableWidth - hintWidth) / gridSize;
+    final hintWidth = 60.0;
+    final hintHeight = 60.0;
+    final padding = 8.0;
+
+    // Calculate available space
+    final availableWidth = MediaQuery.of(context).size.width - hintWidth - (padding * 2);
+    final availableHeight = MediaQuery.of(context).size.height - 280; // AppBar + buttons + margins
+
+    // Calculate cell size to fit perfectly
+    final cellSizeByWidth = availableWidth / gridSize;
+    final cellSizeByHeight = (availableHeight - hintHeight) / gridSize;
+    final cellSize = (cellSizeByWidth < cellSizeByHeight ? cellSizeByWidth : cellSizeByHeight).clamp(20.0, 100.0);
 
     return Listener(
       onPointerDown: (event) {
@@ -377,16 +386,15 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
       onPointerUp: (_) {
         _draggedCells.clear();
       },
-      child: SingleChildScrollView(
-        child: Row(
-          key: _gridKey,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      child: Row(
+        key: _gridKey,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             SizedBox(
               width: hintWidth,
               child: Column(
                 children: [
-                  SizedBox(height: cellSize * 2),
+                  SizedBox(height: hintHeight),
                   ...List.generate(widget.board.length, (row) {
                     return SizedBox(
                       height: cellSize,
@@ -411,7 +419,7 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
               child: Column(
                 children: [
                   SizedBox(
-                    height: cellSize * 2.5,
+                    height: hintHeight,
                     child: Row(
                       children: List.generate(widget.board[0].length, (col) {
                         return Expanded(
@@ -476,7 +484,6 @@ class _NonogramGridState extends ConsumerState<_NonogramGrid> {
             ),
           ],
         ),
-      ),
     );
   }
 }
